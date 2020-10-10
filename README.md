@@ -21,7 +21,7 @@ Java Spring Framework 4.2.4에서 Autowired를 사용하는 방법으로 xml 환
 ##### (Autowired is applied by getting Beans through XML(Context) of Spring-Framework. Then I called the DataSource and did the task.)
 
 ### 2. 시연(Demonstration)
-##### 1.
+##### 1. Spring Framework 4.24, XML Context Config - DB settings(Autowired), https://www.youtube.com/watch?v=y_S3YnsPXQk, Accessed by 2020-10-10, Last Modified 2020-10-10.
 
 ### 3. 참고자료(Reference)
 ##### 1. Maven Repository: Search/Browse/Explore, https://mvnrepository.com/, Accessed by 2020-09-24, Last Modified .
