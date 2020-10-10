@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+
+	<context:component-scan base-package="com.website.example" />
+
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+	<!-- 1. DataSource 설정 -->
+	<context:property-placeholder location="classpath:db.properties" />
+	
+	<!-- MySQL - DataSource 셋팅 -->
+    <bean id="dataSource2" class="com.mysql.cj.jdbc.MysqlDataSource"> 
+        <property name="URL" value="${ORACLE_DB_URL}" /> 
+        <property name="user" value="${ORACLE_DB_USERNAME}"/> 
+        <property name="password" value="${ORACLE_DB_PASSWORD}"/>
+    </bean>
+    
+    <!-- <bean id="dataSource" 
+	class="org.springframework.jdbc.datasource.DriverManagerDataSource"> -->
+	
+	<!-- 2. Oracle - DataSource 셋팅 -->
+    <bean id="dataSource" class="oracle.jdbc.pool.OracleDataSource" destroy-method="close"> 
+        <property name="URL" value="${ORACLE_DB_URL}" /> 
+        <property name="user" value="${ORACLE_DB_USERNAME}"/> 
+        <property name="password" value="${ORACLE_DB_PASSWORD}"/> 
+        <property name="connectionCachingEnabled" value="true"/> 
+    </bean>
+    
+    <!-- 3. Apache DBCP -->
+    <!-- 
+    <bean id="dataSource3" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+         <property name="driverClassName" value="${jdbc.driverClassName}" />
+         <property name="url" value="${jdbc.url}" />
+         <property name="username" value="${jdbc.username}" />
+         <property name="password" value="${jdbc.password}" />
+    </bean>
+     -->
+    
+    <!-- 4. HikariCP -->
+    <!-- 
+    <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+  		 <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+    	 <property name="jdbcUrl" value="jdbc:oracle:thin:@localhost:1521:xe" />
+    	 <property name="username" value="username" />
+    	 <property name="password" value="password" />
+	</bean>
+	 
+	<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource"
+	    destroy-method="close">
+	    <constructor-arg ref="hikariConfig"/>
+	</bean>
+     -->
+    
+    <!-- 5. MariaDB -->
+    <!-- 
+    <bean id="dataSource4" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+        <property name="driverClass" value="org.mariadb.jdbc.Driver"/>
+        <property name="url" value="jdbc:mariadb://localhost:3306/test"></property>
+        <property name="username" value="root"/>
+        <property name="password" value="test"/>
+    </bean>
+     -->
+     
+    <!-- 6. MyBatis -->
+    <!-- 
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource4"/>
+        <property name="configLocation" value="classpath:mybatis/config.xml"/>
+        <property name="mapperLocations" value="classpath:mybatis/sql/*.xml"></property>
+    </bean>
+    
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+    </bean>
+    
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource4"/>
+    </bean>
+    
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+     -->
+    
+	<!-- Spring JDBC 설정 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- Transaction 설정 -->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true"/>
+			<tx:method name="*"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut id="txPointcut"  expression="execution(* com.website.example.service.DBService..*(..))"/>
+		
+		<aop:advisor pointcut-ref="txPointcut" advice-ref="txAdvice"/>
+	</aop:config>
+	
+</beans>
